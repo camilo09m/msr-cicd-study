@@ -1,84 +1,62 @@
-# Caracterización de fallos en Pull Requests de CI/CD generados por agentes mediante análisis de PRs rechazados
+# Caracterización de fallos en Pull Requests que modifican configuración de CI/CD generados por agentes
 
 ---
 
-## Descripción contexto
+## 1. Motivación
 
-El contexto de este estudio corresponde al creciente uso de agentes de inteligencia artificial como asistentes o contribuidores dentro de flujos colaborativos de desarrollo de software. En particular, los agentes están comenzando a generar Pull Requests relacionados con configuraciones de integración y despliegue continuo (CI/CD), incluyendo workflows y archivos YAML utilizados en automatización de pipelines.
 
----
 
-## Problema
+## 2. Problema
 
-El problema es que actualmente existe poca comprensión sobre los tipos de errores o fallos que presentan los Pull Requests relacionados con CI/CD generados por agentes. Aunque algunos PRs son aceptados, otros son rechazados por los maintainers, lo que sugiere problemas en configuraciones, sintaxis, estructura o compatibilidad de pipelines. Sin embargo, no existe una caracterización clara de estos fallos ni de los patrones presentes en los PRs rechazados.
+Los estudios recientes sobre PRs agénticos en AIDev abordan calidad de descripciones, intervención humana, esfuerzo de revisión y errores de pruebas, pero ninguno caracteriza los modos de fallo cuando el cambio toca configuración CI/CD. Específicamente, se desconoce: qué proporción de los PRs CI/CD agénticos termina cerrada sin merge, si esa tasa varía sistemáticamente entre agentes, qué señales del proceso de revisión predominan en los rechazos, qué tipos de defectos aparecen con más frecuencia en los archivos CI/CD modificados, y cómo se comparan estos patrones con PRs CI/CD escritos por humanos.
 
----
+## 3. Diseño metodólogico
 
-## Propuesta
+### 3.1 Objetivo
+Caracterizar empíricamente los modos de fallo presentes en los Pull Requests que modifican configuración CI/CD generados por agentes de IA y que terminan cerrados sin merge, mediante el análisis del dataset AIDev y la construcción de una taxonomía inductiva validada por acuerdo intercodificador.
 
-Para abordar el problema, se propone analizar Pull Requests asociados a CI/CD utilizando el dataset AIDev del Mining Challenge MSR. Primero, se realizará un filtrado de PRs relacionados con CI/CD mediante la identificación de archivos YAML y workflows modificados en los cambios del PR. Posteriormente, los PRs serán clasificados según su estado (aceptados o rechazados), enfocando el análisis principalmente en aquellos rechazados.
+### 3.2 Conjunto de datos: pasos de construcción
+Se utiliza la versión filtrada AIDev-pop (repositorios con ≥ 100 estrellas), por contar con señales de revisión más completas. Las tablas explotadas y sus columnas son:
 
-Finalmente, se aplicará una técnica de card sorting sobre los PRs rechazados para identificar y agrupar patrones de fallos recurrentes presentes en configuraciones de CI/CD generadas por agentes. Esto permitirá construir una caracterización empírica de los errores más comunes asociados a este tipo de tareas.
+| Tabla | Columnas explotadas |
+|---|---|
+| `pull_request` | `id`, `state`, `merged_at`, `closed_at`, `created_at`, `agent`, `repo_url`, `html_url`, `title`, `body` |
+| `human_pull_request` | mismas columnas (baseline humano) |
+| `pr_commit_details` | `pr_id`, `filename`, `status`, `additions`, `deletions`, `changes`, `message`, `patch` |
+| `pr_reviews` | `pr_id`, `state`, `body` |
+| `pr_review_comments_v2` | `pr_id`, `body` |
+| `pr_comments` | `pr_id`, `body` |
+| `pr_timeline` | `pr_id`, `event` |
 
----
+La construcción del conjunto de trabajo se realiza con la siguiente cadena explícita de pasos. Las reducciones se reportan tras la ejecución; los órdenes de magnitud anticipados sirven de referencia operacional.
 
-## Metodología
+| Paso | Filtro | Unidad de salida |
+|---|---|---|
+| F0 | Universo: `pull_request` (33.6K PRs de agentes en AIDev-pop) | PRs |
+| F1 | El PR modifica **al menos un** archivo CI/CD (matching de `pr_commit_details.filename`) | PRs |
+| F2 | El PR está rechazado: `state == 'closed' AND merged_at IS NULL` | PRs |
+| F3 | El PR es único y sin repeticiones | PRs |
 
-El estudio seguirá un enfoque empírico exploratorio con análisis cuantitativo y cualitativo.
 
-### 1. Recolección y preparación de datos
+### 3.2.1 Patrones de filename considerados CI/CD
 
-Se utilizará el dataset AIDev del Mining Challenge MSR. Las tablas principales consideradas serán:
+```
+.github/workflows/.*\.ya?ml         .gitlab-ci\.ya?ml
+.circleci/config\.ya?ml             Jenkinsfile(\..+)?
+azure-pipelines\.ya?ml              .travis\.ya?ml
+bitbucket-pipelines\.ya?ml          .drone\.ya?ml
+buildkite\.ya?ml                    appveyor\.ya?ml
+```
+### 3.2.3 Definición operacional de estado
 
-* `pull_request`
-* `pr_commit_details`
-* `pr_comments`
-* `pr_reviews`
-* `pr_timeline`
+- **Aceptado:** `merged_at IS NOT NULL`.
+- **Rechazado (cerrado sin merge):** `state == 'closed' AND merged_at IS NULL`.
+- **Abierto:** `state == 'open'` (excluido del análisis principal).
 
-### 2. Filtrado de PRs relacionados con CI/CD
+Se discute explícitamente en *Amenazas a la validez* que "cerrado sin merge" no equivale a "rechazado por defecto"; puede reflejar abandono, superación por otro PR o reorganización.
 
-Se seleccionarán Pull Requests que modifiquen archivos asociados a pipelines y automatización, por ejemplo:
+## 4. Preguntas
 
-* `.yml`
-* `.yaml`
-* `.github/workflows/*`
 
-La identificación se realizará utilizando los nombres de archivos disponibles en `pr_commit_details.filename`.
 
-### 3. Clasificación de PRs
-
-Los PRs serán clasificados según su estado:
-
-* aceptados (`merged`)
-* rechazados (`closed` sin merge)
-
-El análisis principal se enfocará en los PRs rechazados.
-
-### 4. Extracción de información
-
-Para cada PR se analizarán variables observables del dataset, incluyendo:
-
-* additions
-* deletions
-* changes
-* archivos modificados
-* comentarios
-* reviews
-* eventos asociados al PR
-
-### 5. Card Sorting
-
-Los PRs rechazados serán revisados manualmente mediante card sorting abierto realizado por los investigadores. El objetivo será identificar categorías emergentes de fallos relacionados con CI/CD.
-
-Posibles categorías esperadas:
-
-* errores de sintaxis YAML
-* configuraciones incompletas
-* dependencias incorrectas
-* errores en workflows
-* problemas de compatibilidad
-
-### 6. Análisis de resultados
-
-Finalmente, se analizarán las categorías identificadas, su frecuencia y los patrones presentes en los PRs rechazados para construir una caracterización de fallos en PRs de CI/CD generados por agentes.
+## 5. Resultados
