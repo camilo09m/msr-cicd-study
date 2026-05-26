@@ -1,4 +1,4 @@
-# Caracterización de fallos en Pull Requests de CI/CD generados por agentes mediante análisis de PRs rechazados
+# Caracterización de fallos en Pull Requests de CI/CD generados por agentes mediante análisis de Pull Requests cerrados sin merge
 
 ---
 
@@ -38,7 +38,7 @@ Se utilizará el dataset AIDev del Mining Challenge MSR. Las tablas principales 
 
 ### 2. Filtrado de PRs relacionados con CI/CD
 
-Se seleccionarán Pull Requests que modifiquen archivos asociados a pipelines y automatización, por ejemplo:
+Se considerarán PRs relacionados con CI/CD aquellos que modifiquen archivos asociados a automatización, workflows y pipelines, incluyendo archivos
 
 * `.yml`
 * `.yaml`
@@ -51,9 +51,9 @@ La identificación se realizará utilizando los nombres de archivos disponibles 
 Los PRs serán clasificados según su estado:
 
 * aceptados (`merged`)
-* rechazados (`closed` sin merge)
+* PRs cerrados sin merge (closed y merged_at = null)
 
-El análisis principal se enfocará en los PRs rechazados.
+En este estudio, dichos PRs serán utilizados como aproximación operacional de PRs rechazados.
 
 ### 4. Extracción de información
 
@@ -79,6 +79,12 @@ Posibles categorías esperadas:
 * errores en workflows
 * problemas de compatibilidad
 
-### 6. Análisis de resultados
+Cada categoría identificada será documentada mediante una definición explícita y criterios de inclusión para reducir ambigüedades durante el proceso de clasificación.
+
+### 6. Piloto
+
+Antes del análisis completo, se realizará una revisión piloto sobre un subconjunto inicial de PRs para validar criterios de clasificación y unificar interpretaciones entre los investigadores.
+
+### 7. Análisis de resultados
 
 Finalmente, se analizarán las categorías identificadas, su frecuencia y los patrones presentes en los PRs rechazados para construir una caracterización de fallos en PRs de CI/CD generados por agentes.
