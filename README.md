@@ -36,6 +36,7 @@ La construcción del conjunto de trabajo se realiza con la siguiente cadena expl
 | F1 | El PR modifica **al menos un** archivo CI/CD (matching de `pr_commit_details.filename`) | PRs |
 | F2 | El PR está rechazado: `state == 'closed' AND merged_at IS NULL` | PRs |
 | F3 | El PR es único y sin repeticiones | PRs |
+| F4 | El PR modifica **exactamente un** archivo CI/CD (`ci_n_files == 1`) | PRs |
 
 
 ### 3.2.1 Patrones de filename considerados CI/CD
