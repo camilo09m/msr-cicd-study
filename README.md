@@ -1,22 +1,24 @@
-# Caracterización de fallos en Pull Requests que modifican configuración de CI/CD generados por agentes de IA
+# Caracterización de rechazos en Pull Requests que modifican configuración de CI/CD generados por agentes de IA
 
 ---
 
 ## 1. Motivación
 
-La creciente adopción de agentes de IA en flujos de desarrollo real hace que esta pregunta tenga consecuencias prácticas inmediatas. Los equipos que integran estos agentes no cuentan con evidencia empírica para decidir qué agente delegar para tareas CI/CD, qué aspectos de esos cambios revisar con mayor cuidado, ni cómo orientar al agente para producir configuraciones aceptables. A su vez, los mantenedores de proyectos se enfrentan a PRs CI/CD generados automáticamente sin disponer de patrones documentados que faciliten su revisión. Caracterizar los fallos en estos PRs es un primer paso necesario para que tanto equipos como revisores puedan tomar decisiones informadas.
+La creciente adopción de agentes de IA en flujos de desarrollo real hace que esta pregunta tenga consecuencias prácticas inmediatas. Los equipos que integran estos agentes no cuentan con evidencia empírica para decidir qué agente delegar para tareas CI/CD, qué aspectos de esos cambios revisar con mayor cuidado, ni cómo orientar al agente para producir configuraciones aceptables. A su vez, los mantenedores de proyectos se enfrentan a PRs CI/CD generados automáticamente sin disponer de patrones documentados que faciliten su revisión. Caracterizar los rechazos en estos PRs es un primer paso necesario para que tanto equipos como revisores puedan tomar decisiones informadas.
 
 ## 2. Problema
 
-Cuando un agente de IA propone un cambio sobre un archivo de configuración CI/CD —un workflow de GitHub Actions, un `.gitlab-ci.yml`, un Jenkinsfile— ese cambio puede contener defectos de distinta naturaleza: una sintaxis YAML inválida, una referencia a una acción deprecada, la eliminación injustificada de un job de pruebas, un secret expuesto en un step, un trigger que rompe la convención del proyecto. Estos defectos son detectados durante la revisión del Pull Request, por un revisor humano o por un check automatizado del propio repositorio, y se traducen en que el PR termina cerrado sin merge. Este estudio se ocupa de esa clase de fallo: defectos en el cambio propuesto al archivo CI/CD, observables en el diff y en la discusión del PR, que llevan al rechazo antes de que el cambio se integre. Quedan fuera de alcance los fallos en tiempo de ejecución del pipeline tras el merge, porque AIDev no incluye logs de ejecución de los sistemas CI/CD.
+Hoy varios agentes de IA —Claude Code, Cursor, GitHub Copilot, OpenAI Codex y Devin— abren Pull Requests por su cuenta en proyectos reales. Una parte de esos PRs no toca el código del producto, sino los archivos que controlan la integración y el despliegue continuo: los workflows de GitHub Actions, el `.gitlab-ci.yml`, el Jenkinsfile. Son los archivos que deciden cómo se compila, cómo se prueba y cómo se despliega el proyecto.
 
-Sobre estos fallos de revisión existe poca evidencia empírica en el contexto de PRs generados por agentes. Específicamente, se desconoce qué tipos de defectos aparecen, con qué frecuencia relativa, si esa distribución varía entre los cinco agentes del dataset (Claude Code, Cursor, GitHub Copilot, OpenAI Codex, Devin) y si el perfil de fallos difiere del que producen los autores humanos sobre el mismo dominio.
+Muchos de esos PRs no llegan a integrarse: el mantenedor revisa el cambio propuesto y lo cierra sin mergear. Es importante notar qué se puede y qué no se puede afirmar sobre esos cierres. No se puede afirmar que el cambio estuviera "roto" en sentido técnico, porque verificarlo exigiría ejecutar el pipeline con el cambio aplicado, y AIDev no incluye logs de ejecución de CI/CD. Lo que sí se puede observar es el diff del archivo CI/CD, los comentarios del revisor, el veredicto del review y el hecho de que el PR terminó cerrado sin merge. El objeto de estudio, entonces, no son fallos de ejecución, sino cambios rechazados durante la revisión: propuestas del agente que el mantenedor del proyecto decidió no aceptar.
+
+Sobre esos rechazos existe poca evidencia empírica. No sabemos qué tipos de cambios rechazan los mantenedores con más frecuencia cuando provienen de agentes, si todos los agentes son rechazados por motivos parecidos o si cada uno tiene su propio perfil, ni si los humanos que tocan estos mismos archivos enfrentan los mismos motivos de rechazo o no.
 
 ## 3. Diseño metodológico
 
 ### 3.1 Objetivo
 
-Caracterizar empíricamente los modos de fallo presentes en los Pull Requests que modifican configuración CI/CD generados por agentes de IA y que terminan cerrados sin merge, mediante el análisis del dataset AIDev y la construcción de una taxonomía inductiva validada por acuerdo intercodificador.
+Caracterizar empíricamente los motivos por los cuales los Pull Requests que modifican configuración CI/CD generados por agentes de IA son cerrados sin merge, mediante el análisis del dataset AIDev y la construcción de una taxonomía inductiva validada por acuerdo intercodificador.
 
 ### 3.2 Conjunto de datos
 
@@ -70,7 +72,7 @@ PI1. ¿Cuál es la tasa de rechazo de los PRs que incluyen modificaciones CI/CD 
 
 PI2. ¿Qué señales del proceso de revisión (pr_reviews.state, eventos de pr_timeline, volumen de pr_comments y pr_review_comments_v2, tamaño del cambio en los archivos CI/CD) caracterizan a los PRs CI/CD rechazados frente a los aceptados?
 
-PI3. ¿Qué categorías de fallo emergen al aplicar card sorting sobre los archivos CI/CD modificados en PRs rechazados, y cómo se distribuyen entre agentes?
+PI3. ¿Qué categorías de motivos de rechazo emergen al aplicar card sorting sobre los archivos CI/CD modificados en PRs rechazados, y cómo se distribuyen entre agentes?
 
 PI4. ¿Cómo se comparan estos patrones con los PRs CI/CD escritos por humanos (human_pull_request)?
 
