@@ -15,9 +15,6 @@ Los agentes de IA generan cambios sobre configuración CI/CD que son cerrados si
 
 ## 3. Objetivo de la Investigación
 
-
-.
-
 ### 3.1 Objetivo General
 
 Caracterizar empíricamente los motivos por los cuales los Pull Requests que modifican configuración CI/CD generados por agentes de IA son cerrados sin merge, mediante el análisis del dataset AIDev y la construcción de una taxonomía inductiva validada por acuerdo intercodificador.
