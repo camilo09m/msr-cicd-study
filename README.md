@@ -20,7 +20,7 @@ Los agentes de IA generan cambios sobre configuración CI/CD que son cerrados si
 Caracterizar empíricamente los motivos por los cuales los Pull Requests que modifican configuración CI/CD generados por agentes de IA son cerrados sin merge, mediante el análisis del dataset AIDev y la construcción de una taxonomía inductiva validada por acuerdo intercodificador.
 
 ## 4. Pregunta de Investigación
-- ¿Qué categorías de motivos de rechazo emergen al aplicar card sorting sobre los archivos CI/CD modificados en PRs rechazados, y cómo se distribuyen entre agentes?
+- ¿Cuáles son las razones por las cuales los Pull Requests que modifican configuraciones CI/CD generados por agentes de IA son cerrados sin merge? 
 
 ## 5. Diseño Metodológico
 
