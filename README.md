@@ -1,6 +1,9 @@
 # Caracterización de rechazos en Pull Requests que modifican configuración de CI/CD generados por agentes de IA
 
 ---
+## Definiciones
+En este documento, los términos **"Pull Request rechazado"**, **"cerrado sin merge"** y **"closed without merge"** se utilizan de forma equivalente para referirse a Pull Requests que fueron cerrados sin que sus cambios fueran integrados a la rama de destino. La utilización del término "rechazo" no implica necesariamente una decisión explícita de desaprobación por parte de los mantenedores, sino que describe el resultado observable de que el Pull Request fue cerrado sin realizar merge
+
 
 ## 1. Motivación
 
@@ -11,6 +14,9 @@ La creciente adopción de agentes de IA en flujos de desarrollo real hace que es
 Los agentes de IA generan cambios sobre configuración CI/CD que son cerrados sin merge. Sin embargo, no existe una razon de los motivos de rechazo ni evidencia de si esos motivos difieren entre agentes.
 
 ## 3. Objetivo de la Investigación
+
+
+.
 
 ### 3.1 Objetivo General
 
