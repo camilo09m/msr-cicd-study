@@ -156,10 +156,9 @@ Se evita sobrecuantificar datos cualitativos: la ausencia de una categoría en u
 
 ## 6. Estado de Avance
 
-
 ### 6.1 Fase completada: Card Sorting Abierto 
 
-Se codificaron de forma independiente los PRs distribuidos entre dos codificadores. Esta fase corresponde al card sort abierto descrito en §5.2.3: ambos codificadores asignaron etiquetas libremente sin categorías predefinidas.
+Se codificaron de forma independiente 50 PRs (Copilot:  distribuidos entre dos codificadores. Esta fase corresponde al card sort abierto descrito en §5.2.3: ambos codificadores asignaron etiquetas libremente sin categorías predefinidas.
 
 | Métrica | Valor |
 |---|---|
@@ -168,6 +167,7 @@ Se codificaron de forma independiente los PRs distribuidos entre dos codificador
 | PRs en acuerdo | 30 (60,0 %) |
 | PRs en desacuerdo | 20 (40,0 %) |
 | Acuerdo observado (P₀) | 0,60 |
+
 
 ### 6.2 Codebook consolidado (v1.0)
 
@@ -210,6 +210,26 @@ A partir del card sorting abierto, se construyó un codebook de 17 categorías m
 |---|---|---|
 | **C00** | No Clasificable / Datos Insuficientes | No hay suficiente información para asignar categoría (página no disponible, idioma no comprensible, sin artefactos accesibles). |
 
+### 6.3  Análisis de desacuerdos entre codificadores
+
+De los 20 PRs en desacuerdo, se identificaron cuatro tipos de discrepancia:
+
+| Tipo de desacuerdo | n | Descripción |
+|---|---|---|
+| **Desacuerdo Conceptual** | 9 | Los codificadores difieren en la interpretación semántica de la evidencia (ej. C12 vs C13: ¿silencio o voluntad explícita?). |
+| **Dato Faltante** | 5 | Uno de los codificadores no pudo acceder al artefacto (página 404, idioma no analizable), mientras el otro sí extrajo evidencia. |
+| **Desacuerdo Causa vs Mecanismo de Cierre** | 5 | Un codificador prioriza la causa técnica del fallo (ej. C02 cobertura) y el otro el mecanismo de cierre (ej. C14 scope reorientado). |
+| **Desacuerdo de Granularidad CI** | 1 | Diferencia entre una categoría CI general (C01) y una específica (C04 nuevo workflow). |
+
+Los pares de códigos más frecuentes en desacuerdo fueron:
+
+| Gonzalo → Camilo | n | Tipo |
+|---|---|---|
+| C12 → C13 | 4 | Conceptual (¿silencio o decisión voluntaria?) |
+| C00 → C12 / C04 / C14 | 4 | Dato faltante (Gonzalo sin acceso, Camilo con evidencia) |
+| C05/C06/C07 → C12/C02/C15 | 3 | Causa vs mecanismo de cierre |
+
+Estos desacuerdos orientan las prioridades de la sesión de consolidación antes del card sort cerrado (§6.5).
 
 ## 7. Referencias
 
