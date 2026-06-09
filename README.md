@@ -154,7 +154,64 @@ La distribución de categorías por agente se reportará de forma descriptiva.
 
 Se evita sobrecuantificar datos cualitativos: la ausencia de una categoría en un PR no implica necesariamente la ausencia del fenómeno, sino únicamente que dicho motivo no se manifestó explícitamente en ese caso [4].
 
-## 6. Referencias
+## 6. Estado de Avance
+
+
+### 6.1 Fase completada: Card Sorting Abierto 
+
+Se codificaron de forma independiente los PRs distribuidos entre dos codificadores. Esta fase corresponde al card sort abierto descrito en §5.2.3: ambos codificadores asignaron etiquetas libremente sin categorías predefinidas.
+
+| Métrica | Valor |
+|---|---|
+| Tarjetas codificadas | 50 |
+| Codificadores | 2 (Camilo, Gonzalo) |
+| PRs en acuerdo | 30 (60,0 %) |
+| PRs en desacuerdo | 20 (40,0 %) |
+| Acuerdo observado (P₀) | 0,60 |
+
+### 6.2 Codebook consolidado (v1.0)
+
+A partir del card sorting abierto, se construyó un codebook de 17 categorías mediante discusión directa entre codificadores, siguiendo la estrategia de Liang et al. [2].
+
+#### Familia 1 — Fallas de CI/CD
+
+| Código | Nombre | Definición breve |
+|---|---|---|
+| **C01** | CI Failure General | El pipeline falló por errores introducidos o no anticipados por el PR (runner inválido, rebase incorrecto, fallo no resuelto sin causa clara). |
+| **C02** | CI Failure — Cobertura Insuficiente | El pipeline bloqueó el merge porque la cobertura de pruebas no alcanza el umbral mínimo configurado (coverage gate). |
+| **C03** | CI Failure — Fallos Masivos en Validaciones | El pipeline presenta fallos generalizados en múltiples pasos de validación (lint, tests, build, deploy) sin que una causa única sea dominante. |
+| **C04** | CI Failure — Nuevo Workflow sin Auto-validar | El PR introduce un nuevo workflow de CI/CD que falla en su propia ejecución inicial, sin correcciones antes del cierre. |
+| **C05** | CI Failure — Migración / Compatibilidad de Build | El pipeline se rompe durante una actualización de herramientas de build, versiones de dependencias o estrategia CI multi-módulo. |
+| **C06** | CI Failure — Governance Gate | El cierre se debe a que el PR no completó un proceso de gobernanza obligatorio: aprobación de revisores, PRLint, firmas de autoría, etc. |
+| **C07** | CI Failure — Optimización Incorrecta del Pipeline | El PR modifica la estrategia de ejecución de pruebas (paralelismo, matriz, runners) de forma incorrecta, causando fallo del pipeline. |
+
+#### Familia 2 — Rechazo en Revisión
+
+| Código | Nombre | Definición breve |
+|---|---|---|
+| **C08** | Rechazo por Diseño o Calidad del Código | El mantenedor rechaza el PR porque la solución no satisface criterios de calidad, diseño funcional o decisión arquitectónica. |
+| **C09** | Cambios Demasiado Grandes o Difíciles de Revisar | El PR es cerrado porque el diff generado es excesivamente grande, difícil de leer o está mal estructurado para revisión humana. |
+| **C10** | Desalineación entre Solución y Causa Raíz | La solución propuesta no aborda correctamente el problema real, o el agente careció de contexto clave para proponer la solución correcta. |
+| **C11** | Cambios Obsoletos por Evolución Arquitectónica | El PR fue cerrado porque la arquitectura del proyecto cambió mientras estaba abierto, dejando los cambios desactualizados o irrelevantes. |
+
+#### Familia 3 — Proceso y Cierre
+
+| Código | Nombre | Definición breve |
+|---|---|---|
+| **C12** | Cierre Silencioso sin Explicación | El PR fue cerrado sin ningún comentario explicativo; no hay evidencia del motivo. |
+| **C13** | Cierre Voluntario / Deliberado | El autor o el mantenedor cierra deliberadamente el PR (experimento concluido, rama eliminada, decisión propia). |
+| **C14** | Pospuesto o Scope Reorientado | El PR fue cerrado con trabajo incompleto (WIP permanente) o el alcance fue reorientado para reimplementar más adelante. |
+| **C15** | Reemplazado por Otro Pull Request | El PR fue cerrado porque fue sustituido por otro PR (del mantenedor, del propio agente, o abierto en repositorio correcto). |
+| **C16** | Configuración Incorrecta de Entorno | El PR falla porque el entorno de CI/CD no tiene los componentes, variables o configuración necesarios para ejecutar el pipeline propuesto. |
+
+#### Sin categoría
+
+| Código | Nombre | Definición breve |
+|---|---|---|
+| **C00** | No Clasificable / Datos Insuficientes | No hay suficiente información para asignar categoría (página no disponible, idioma no comprensible, sin artefactos accesibles). |
+
+
+## 7. Referencias
 
 Las siguientes referencias fundamentan la metodología cualitativa (*card sorting* y técnicas de codificación adyacentes) empleada en la PI3.
 
