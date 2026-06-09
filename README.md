@@ -8,21 +8,26 @@ La creciente adopción de agentes de IA en flujos de desarrollo real hace que es
 
 ## 2. Problema
 
-Hoy varios agentes de IA —Claude Code, Cursor, GitHub Copilot, OpenAI Codex y Devin— abren Pull Requests por su cuenta en proyectos reales. Una parte de esos PRs no toca el código del producto, sino los archivos que controlan la integración y el despliegue continuo: los workflows de GitHub Actions, el `.gitlab-ci.yml`, el Jenkinsfile. Son los archivos que deciden cómo se compila, cómo se prueba y cómo se despliega el proyecto.
+Los agentes de IA generan cambios sobre configuración CI/CD que son cerrados sin merge. Sin embargo, no existe una razon de los motivos de rechazo ni evidencia de si esos motivos difieren entre agentes.
 
-Muchos de esos PRs no llegan a integrarse: el mantenedor revisa el cambio propuesto y lo cierra sin mergear. Es importante notar qué se puede y qué no se puede afirmar sobre esos cierres. No se puede afirmar que el cambio estuviera "roto" en sentido técnico, porque verificarlo exigiría ejecutar el pipeline con el cambio aplicado, y AIDev no incluye logs de ejecución de CI/CD. Lo que sí se puede observar es el diff del archivo CI/CD, los comentarios del revisor, el veredicto del review y el hecho de que el PR terminó cerrado sin merge. El objeto de estudio, entonces, no son fallos de ejecución, sino cambios rechazados durante la revisión: propuestas del agente que el mantenedor del proyecto decidió no aceptar.
+## 3. Objetivo de la Investigación
 
-Sobre esos rechazos existe poca evidencia empírica. No sabemos qué tipos de cambios rechazan los mantenedores con más frecuencia cuando provienen de agentes, si todos los agentes son rechazados por motivos parecidos o si cada uno tiene su propio perfil, ni si los humanos que tocan estos mismos archivos enfrentan los mismos motivos de rechazo o no.
-
-## 3. Diseño metodológico
-
-### 3.1 Objetivo
+### 3.1 Objetivo General
 
 Caracterizar empíricamente los motivos por los cuales los Pull Requests que modifican configuración CI/CD generados por agentes de IA son cerrados sin merge, mediante el análisis del dataset AIDev y la construcción de una taxonomía inductiva validada por acuerdo intercodificador.
 
-### 3.2 Conjunto de datos
+## 4. Pregunta de Investigación
+- ¿Qué categorías de motivos de rechazo emergen al aplicar card sorting sobre los archivos CI/CD modificados en PRs rechazados, y cómo se distribuyen entre agentes?
 
-Se utiliza la variante AIDev-pop (repositorios con ≥ 100 estrellas), por contar con señales de revisión más completas. Las tablas explotadas y sus columnas relevantes son:
+## 5. Diseño Metodológico
+
+### 5.1 Conjunto de Datos
+
+#### 5.1.1 Fuente de datos
+
+Se utiliza la variante AIDev-pop (repositorios con ≥ 100 estrellas), por contar con señales de revisión más completas.
+
+#### 5.1.2 Tablas utilizadas
 
 | Tabla | Columnas explotadas |
 |---|---|
@@ -34,48 +39,128 @@ Se utiliza la variante AIDev-pop (repositorios con ≥ 100 estrellas), por conta
 | `pr_comments` | `pr_id`, `body` |
 | `pr_timeline` | `pr_id`, `event` |
 
-#### 3.2.1 Cadena de filtros
+#### 5.1.3 Cadena de filtros
 
-El conjunto de trabajo se construye aplicando los siguientes pasos en orden. Los volúmenes indicados son de referencia operacional; los valores definitivos se reportan tras la ejecución.
+El conjunto de trabajo se construye aplicando los siguientes pasos en orden.
+| Paso | Filtro | Resultado | % del universo (F0) |
+|---|---|---|---|
+| F0 | Universo: tabla `pull_request` (AIDev-pop) | ~33 600 PRs | 100 % |
+| F1 | El PR modifica al menos un archivo CI/CD (`pr_commit_details.filename`) | ~2 376 PRs | ~7,1 % |
+| F2 | PR rechazado: `state == 'closed' AND merged_at IS NULL` | ~454 PRs | ~1,4 % |
+| F3 | Deduplicación: un registro por PR | ~454 PRs únicos | ~1,4 % |
+| F4 | El PR modifica exactamente un archivo CI/CD (`ci_n_files == 1`) | ~269 PRs | ~0,8 % |
 
-| Paso | Filtro | Resultado esperado |
-|---|---|---|
-| F0 | Universo: tabla `pull_request` (AIDev-pop) | ~33 600 PRs |
-| F1 | El PR modifica al menos un archivo CI/CD (`pr_commit_details.filename`) | ~2 376 PRs |
-| F2 | PR rechazado: `state == 'closed' AND merged_at IS NULL` | ~454 PRs |
-| F3 | Deduplicación: un registro por PR | ~454 PRs únicos |
-| F4 | El PR modifica exactamente un archivo CI/CD (`ci_n_files == 1`) | ~269 PRs |
+#### 5.1.4 Patrones de filename considerados CI/CD
 
-#### 3.2.2 Patrones de filename considerados CI/CD
-
+```text
+.github/workflows/.*\.ya?ml
+.gitlab-ci\.ya?ml
+.circleci/config\.ya?ml
+Jenkinsfile(\..+)?
+azure-pipelines\.ya?ml
+.travis\.ya?ml
+bitbucket-pipelines\.ya?ml
+.drone\.ya?ml
+buildkite\.ya?ml
+appveyor\.ya?ml
 ```
-.github/workflows/.*\.ya?ml         .gitlab-ci\.ya?ml
-.circleci/config\.ya?ml             Jenkinsfile(\..+)?
-azure-pipelines\.ya?ml              .travis\.ya?ml
-bitbucket-pipelines\.ya?ml          .drone\.ya?ml
-buildkite\.ya?ml                    appveyor\.ya?ml
-```
 
-#### 3.2.3 Definición operacional de estado
+#### 5.1.5 Definición operacional de estado
 
 - **Aceptado:** `merged_at IS NOT NULL`.
 - **Rechazado (cerrado sin merge):** `state == 'closed' AND merged_at IS NULL`.
 - **Abierto:** `state == 'open'` (excluido del análisis principal).
 
-Se discute explícitamente en *Amenazas a la validez* que "cerrado sin merge" no equivale a "rechazado por mala calidad"; puede reflejar abandono, superación por otro PR o reorganización.
+Se discute explícitamente en *Amenazas a la Validez* que "cerrado sin merge" no equivale necesariamente a "rechazado por mala calidad"; puede reflejar abandono, superación por otro PR o reorganización del proyecto.
 
-## 4. Preguntas
+### 5.2 Metodología para la Construcción de la Taxonomía
 
-A partir del conjunto filtrado se formulan cinco preguntas:
+#### 5.2.1 Fundamentación metodológica
 
-PI1. ¿Cuál es la tasa de rechazo de los PRs que incluyen modificaciones CI/CD generados por agentes y cómo varía entre los cinco agentes del dataset?
+La pregunta de investigación se aborda mediante *card sorting*, una técnica cualitativa para derivar temas y taxonomías a partir de texto, ampliamente usada en la comunidad de Ingeniería de Software para crear modelos mentales y derivar taxonomías a partir de datos [4].
 
-PI2. ¿Qué señales del proceso de revisión (pr_reviews.state, eventos de pr_timeline, volumen de pr_comments y pr_review_comments_v2, tamaño del cambio en los archivos CI/CD) caracterizan a los PRs CI/CD rechazados frente a los aceptados?
+El *card sorting* propiamente tal se fundamenta en Zimmermann [4] y en su aplicación por Begel y Zimmermann, quienes agrupan 679 preguntas abiertas en 12 categorías y destilan un catálogo de 145 preguntas [3]. De forma complementaria se incorporan procedimientos de técnicas cualitativas adyacentes —no de *card sorting* en sentido estricto—: la construcción de taxonomías mediante *etiquetado manual* con doble codificación de Wen et al. [1] y la *codificación abierta* consolidada en un *codebook* de Liang et al. [2].
 
-PI3. ¿Qué categorías de motivos de rechazo emergen al aplicar card sorting sobre los archivos CI/CD modificados en PRs rechazados, y cómo se distribuyen entre agentes?
+#### 5.2.2 Material por tarjeta (*card*)
 
-PI4. ¿Cómo se comparan estos patrones con los PRs CI/CD escritos por humanos (human_pull_request)?
+Siguiendo el principio de "un pensamiento por tarjeta" [4], cada tarjeta corresponde a un PR rechazado y reúne únicamente la evidencia necesaria para juzgar el motivo del rechazo.
 
-PI5. ¿Qué tan generalizable es la taxonomía obtenida más allá de la muestra analizada?
+- **Evidencia primaria (cambio CI/CD):** `ci_filenames`, `ci_patches`, `ci_commit_messages`. Se analiza el *diff* real y no solo el mensaje, tal como Wen et al. inspeccionan el código de cada commit y su predecesor en lugar de limitarse al mensaje del commit [1].
+- **Contexto del PR:** `title`, `body`.
+- **Señales de revisión:** `pr_reviews.body`, `pr_review_comments_v2.body`, `pr_comments.body` y eventos de `pr_timeline`.
+- **Identificador y *demographics*:** `pr_id`, `agent`, `repo_url`. El identificador permite vincular posteriormente cada tarjeta con su agente para el análisis cuantitativo descriptivo.
 
-## 5. Resultados
+#### 5.2.3 Tipo de card sort y protocolo
+
+Se emplea un *card sort* híbrido [4]: abierto en una primera fase para permitir que emerjan categorías desde los datos y cerrado en una segunda fase para clasificar el resto de las tarjetas con una taxonomía consolidada.
+
+El proceso contempla tres etapas:
+
+1. **Preparación.** Se generan las tarjetas a partir de `ci_cd_pr_filtered.csv`, donde cada registro corresponde a un PR e incluye la evidencia descrita anteriormente.
+2. **Ejecución.**
+   - **Card sorting abierto:** dos codificadores clasifican de forma independiente la primera mitad de la muestra sin categorías predefinidas. Cada tarjeta puede iniciar un grupo nuevo o asignarse a uno existente, permitiendo fusionar, dividir o redefinir categorías durante el proceso. Las tarjetas sin sentido o fuera de alcance se asignan al grupo *Discard* [4].
+   - **Consolidación del esquema:** los codificadores concilian sus grupos mediante discusión abierta y construyen una taxonomía cerrada compartida, fusionando categorías conceptualmente similares en un único libro de códigos (*codebook*), siguiendo una estrategia similar a la utilizada por Liang et al. [2].
+   - **Card sorting cerrado:** ambos codificadores clasifican la segunda mitad de la muestra utilizando exclusivamente la taxonomía consolidada.
+3. **Análisis.** Se revisa la consistencia interna de los grupos obtenidos y, mediante diagramas de afinidad, se derivan categorías raíz a partir de las categorías de detalle, siguiendo estrategias similares a las reportadas por Begel y Zimmermann [3] y Wen et al. [1].
+
+#### 5.2.4 Acuerdo intercodificador
+
+Cada tarjeta es clasificada por dos codificadores de forma independiente y las discrepancias se resuelven mediante un tercer codificador, replicando el procedimiento utilizado por Wen et al. [1].
+
+Como criterio cuantitativo de acuerdo se exige **Cohen's κ ≥ 0,6**. Si κ < 0,6, se revisará el esquema de codificación antes de continuar.
+
+Este umbral corresponde a una decisión metodológica propia del estudio. Ninguna de las referencias utilizadas reporta Cohen's κ: Wen et al. informan únicamente porcentaje de desacuerdo [1], Liang et al. no reportan acuerdo intercodificador [2], y Begel y Zimmermann realizan clasificación conjunta hasta alcanzar consenso [3].
+
+#### 5.2.5 Categorías semilla
+
+Para el card sort cerrado se considera inicialmente el siguiente conjunto de categorías derivadas de la literatura y del dominio CI/CD:
+
+- Errores de sintaxis YAML.
+- Referencias a *actions*, imágenes o *runners* inexistentes.
+- Manejo incorrecto de *secrets* o *permissions*.
+- Problemas de matriz de versiones.
+- Cambios en *triggers* (`on:`).
+- Duplicación o eliminación de workflows.
+- Cambios fuera de alcance.
+- Configuraciones no portables.
+
+Estas categorías funcionan únicamente como punto de partida y podrán modificarse durante la fase abierta.
+
+#### 5.2.6 Estrategia de muestreo
+
+El archivo de trabajo exportado, `ci_cd_pr_filtered.csv`, contiene actualmente 269 PRs rechazados con exactamente un archivo CI/CD (salida del filtro F4), distribuidos por agente de la siguiente forma:
+
+| Agente | Cantidad |
+|---|---|
+| Devin | 107 |
+| OpenAI Codex | 83 |
+| Copilot | 58 |
+| Cursor | 14 |
+| Claude Code | 7 |
+
+Esta distribución impone dos restricciones respecto de los objetivos de muestreo:
+
+- El total de 269 tarjetas queda por debajo del mínimo de 300 tarjetas definido para el estudio.
+- Cursor (14) y Claude Code (7) no alcanzan el mínimo de 30 PRs por agente.
+
+Por esta razón, el card sorting se realizará sobre la población F3 (PRs rechazados con uno o más archivos CI/CD; aproximadamente 454 casos según la cadena de filtros), utilizando F4 únicamente como subconjunto auxiliar de menor ruido.
+
+Las tarjetas se barajarán antes de la codificación para reducir efectos de orden [2].
+
+#### 5.2.7 Consideraciones metodológicas
+
+La distribución de categorías por agente se reportará de forma descriptiva.
+
+Se evita sobrecuantificar datos cualitativos: la ausencia de una categoría en un PR no implica necesariamente la ausencia del fenómeno, sino únicamente que dicho motivo no se manifestó explícitamente en ese caso [4].
+
+## 6. Referencias
+
+Las siguientes referencias fundamentan la metodología cualitativa (*card sorting* y técnicas de codificación adyacentes) empleada en la PI3.
+
+[1] F. Wen, C. Nagy, M. Lanza y G. Bavota, «An Empirical Study of Quick Remedy Commits», en *Proc. 28th Int. Conf. on Program Comprehension (ICPC '20)*, Seúl, Corea del Sur, 2020, pp. 1–12. doi: 10.1145/3387904.3389266.
+
+[2] J. T. Liang, C. Yang y B. A. Myers, «A Large-Scale Survey on the Usability of AI Programming Assistants: Successes and Challenges», en *Proc. IEEE/ACM 46th Int. Conf. on Software Engineering (ICSE '24)*, Lisboa, Portugal, 2024. doi: 10.1145/3597503.3608128.
+
+[3] A. Begel y T. Zimmermann, «Analyze This! 145 Questions for Data Scientists in Software Engineering», en *Proc. 36th Int. Conf. on Software Engineering (ICSE '14)*, Hyderabad, India, 2014, pp. 12–23. doi: 10.1145/2568225.2568233.
+
+[4] T. Zimmermann, «Card-sorting: From Text to Themes», en *Perspectives on Data Science for Software Engineering*, Morgan Kaufmann, 2016, pp. 137–141.
