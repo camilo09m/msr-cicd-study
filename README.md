@@ -8,7 +8,7 @@ La creciente adopción de agentes de IA en flujos de desarrollo real hace que es
 
 ## 2. Problema
 
-Los agentes de IA generan cambios sobre configuración CI/CD que son cerrados sin merge. Sin embargo, no existe una razon de los motivos de rechazo ni evidencia de si esos motivos difieren entre agentes.
+Los agentes de IA generan cambios sobre configuración CI/CD que son cerrados sin merge. Sin embargo, no existe una razon de los rechazos ni evidencia de si esos motivos difieren entre agentes.
 
 ## 3. Objetivo de la investigación
 
