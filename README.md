@@ -10,23 +10,33 @@ La creciente adopción de agentes de IA en flujos de desarrollo real hace que es
 
 Los agentes de IA generan cambios sobre configuración CI/CD que son cerrados sin merge. Sin embargo, no existe una razon de los motivos de rechazo ni evidencia de si esos motivos difieren entre agentes.
 
-## 3. Objetivo de la Investigación
+## 3. Objetivo de la investigación
 
-### 3.1 Objetivo General
+### 3.1 Objetivo general
 
- Caracterizar empíricamente los motivos por los cuales los PRs que modifican configuración CI/CD generados por agentes son cerrados sin merge. 
+Caracterizar empíricamente los motivos por los cuales los PRs que modifican configuración CI/CD generados por agentes de IA son cerrados sin merge.
 
+### 3.2 Objetivos específicos
 
-## 4. Pregunta de Investigación
-- ¿Qué categorías de motivos de rechazo emergen al aplicar card sorting sobre los archivos CI/CD modificados en PRs rechazados, y cómo se distribuyen entre agentes?
+1. Construir un conjunto de PRs cerrados sin merge que modifiquen archivos CI/CD.
+2. Aplicar card sorting para derivar categorías de rechazo desde la evidencia disponible en cada PR.
+3. Consolidar un codebook único mediante doble codificación y resolución de desacuerdos.
+4. Organizar las categorías finales en una taxonomía jerárquica de motivos de rechazo.
+5. Reportar la distribución descriptiva de los motivos de rechazo y sus implicancias para desarrolladores, investigadores y constructores de herramientas.
 
-## 5. Diseño Metodológico
+## 4. Pregunta de investigación
 
-### 5.1 Conjunto de Datos
+**RQ1.** ¿Qué categorías de motivos de rechazo emergen al aplicar card sorting sobre PRs cerrados sin merge que modifican configuración CI/CD generados por agentes de IA?
+
+De forma descriptiva, el estudio también permite observar cómo se distribuyen estas categorías entre agentes, siempre evitando interpretar las frecuencias como una medida directa de calidad del agente sin controlar por repositorio, tarea, contexto y disponibilidad de evidencia.
+
+## 5. Diseño metodológico
+
+### 5.1 Conjunto de datos
 
 #### 5.1.1 Fuente de datos
 
-Se utiliza la variante AIDev-pop (repositorios con ≥ 100 estrellas), por contar con señales de revisión más completas.
+Se utiliza la variante **AIDev-pop** —repositorios con al menos 100 estrellas— porque ofrece señales de revisión más completas y reduce la probabilidad de analizar repositorios de prueba o baja actividad.
 
 #### 5.1.2 Tablas utilizadas
 
@@ -42,14 +52,15 @@ Se utiliza la variante AIDev-pop (repositorios con ≥ 100 estrellas), por conta
 
 #### 5.1.3 Cadena de filtros
 
-El conjunto de trabajo se construye aplicando los siguientes pasos en orden.
-| Paso | Filtro | Resultado | % del universo (F0) |
-|---|---|---|---|
-| F0 | Universo: tabla `pull_request` (AIDev-pop) | ~33 600 PRs | 100 % |
-| F1 | El PR modifica al menos un archivo CI/CD (`pr_commit_details.filename`) | ~2 376 PRs | ~7,1 % |
-| F2 | PR rechazado: `state == 'closed' AND merged_at IS NULL` | ~454 PRs | ~1,4 % |
+| Paso | Filtro | Resultado | % del universo F0 |
+|---|---|---:|---:|
+| F0 | Universo: tabla `pull_request` en AIDev-pop | ~33 600 PRs | 100 % |
+| F1 | El PR modifica al menos un archivo CI/CD | ~2 376 PRs | ~7,1 % |
+| F2 | PR cerrado sin merge: `state == closed AND merged_at IS NULL` | ~454 PRs | ~1,4 % |
 | F3 | Deduplicación: un registro por PR | ~454 PRs únicos | ~1,4 % |
-| F4 | El PR modifica exactamente un archivo CI/CD (`ci_n_files == 1`) | ~269 PRs | ~0,8 % |
+| F4 | El PR modifica exactamente un archivo CI/CD | 269 PRs | ~0,8 % |
+
+El análisis actual se realiza sobre F4, porque reduce ruido al observar un único archivo CI/CD por PR.
 
 #### 5.1.4 Patrones de filename considerados CI/CD
 
@@ -78,167 +89,133 @@ Se discute explícitamente en *Amenazas a la Validez* que "cerrado sin merge" no
 
 #### 5.2.1 Fundamentación metodológica
 
-La pregunta de investigación se aborda mediante *card sorting*, una técnica cualitativa para derivar temas y taxonomías a partir de texto, ampliamente usada en la comunidad de Ingeniería de Software para crear modelos mentales y derivar taxonomías a partir de datos [4].
+La construcción de la taxonomía se basa en **card sorting**, técnica cualitativa usada para pasar desde elementos textuales o artefactos individuales hacia temas, categorías y jerarquías interpretables. Zimmermann describe el card sorting como un proceso para derivar taxonomías desde datos y organizar temas en niveles de abstracción. El proceso contempla preparación, ejecución y análisis, y en la fase final se revisan los grupos para deducir categorías más generales.
 
-El *card sorting* propiamente tal se fundamenta en Zimmermann [4] y en su aplicación por Begel y Zimmermann, quienes agrupan 679 preguntas abiertas en 12 categorías y destilan un catálogo de 145 preguntas [3]. De forma complementaria se incorporan procedimientos de técnicas cualitativas adyacentes —no de *card sorting* en sentido estricto—: la construcción de taxonomías mediante *etiquetado manual* con doble codificación de Wen et al. [1] y la *codificación abierta* consolidada en un *codebook* de Liang et al. [2].
+El diseño sigue tres ideas metodológicas principales:
 
-#### 5.2.2 Material por tarjeta (*card*)
+1. **Un caso por tarjeta.** Cada PR corresponde a una tarjeta con identificador único, evidencia del cambio CI/CD, contexto del PR y señales de revisión.
+2. **Codificación abierta inicial.** Las categorías emergen desde los datos, en lugar de imponer un esquema rígido desde el inicio.
+3. **Consolidación jerárquica.** Las categorías de detalle se agrupan en familias raíz para formar una taxonomía, siguiendo el principio usado en estudios empíricos que derivan catálogos o taxonomías a partir de codificación manual.
 
-Siguiendo el principio de "un pensamiento por tarjeta" [4], cada tarjeta corresponde a un PR rechazado y reúne únicamente la evidencia necesaria para juzgar el motivo del rechazo.
+Esta decisión se inspira en trabajos previos de Ingeniería de Software empírica: Wen et al. derivan una taxonomía jerárquica mediante análisis manual de commits; Begel y Zimmermann agrupan respuestas abiertas en categorías mediante card sorting; y Liang et al. consolidan códigos cualitativos en un codebook compartido antes de aplicar el análisis final.
 
-- **Evidencia primaria (cambio CI/CD):** `ci_filenames`, `ci_patches`, `ci_commit_messages`. Se analiza el *diff* real y no solo el mensaje, tal como Wen et al. inspeccionan el código de cada commit y su predecesor en lugar de limitarse al mensaje del commit [1].
-- **Contexto del PR:** `title`, `body`.
-- **Señales de revisión:** `pr_reviews.body`, `pr_review_comments_v2.body`, `pr_comments.body` y eventos de `pr_timeline`.
-- **Identificador y *demographics*:** `pr_id`, `agent`, `repo_url`. El identificador permite vincular posteriormente cada tarjeta con su agente para el análisis cuantitativo descriptivo.
+#### 5.2.2 Material por tarjeta
 
-#### 5.2.3 Tipo de card sort y protocolo
+Cada tarjeta corresponde a un PR cerrado sin merge y contiene:
 
-Se emplea un *card sort* híbrido [4]: abierto en una primera fase para permitir que emerjan categorías desde los datos y cerrado en una segunda fase para clasificar el resto de las tarjetas con una taxonomía consolidada.
+| Tipo de evidencia | Campos utilizados | Uso en la codificación |
+|---|---|---|
+| Evidencia primaria del cambio CI/CD | `filename`, `patch`, `message` | Determinar qué modificación CI/CD propuso el agente. |
+| Contexto del PR | `title`, `body`, `html_url`, `repo_url` | Entender intención declarada, alcance y repositorio afectado. |
+| Señales de revisión | reviews, review comments, comments, timeline | Identificar razones explícitas o implícitas del cierre. |
+| Identificación | `pr_id`, `agent` | Trazabilidad y análisis descriptivo posterior. |
 
-El proceso contempla tres etapas:
+Se privilegia la evidencia del diff y de la conversación del PR por sobre el título o el mensaje de commit aislado.
 
-1. **Preparación.** Se generan las tarjetas a partir de `ci_cd_pr_filtered.csv`, donde cada registro corresponde a un PR e incluye la evidencia descrita anteriormente.
-2. **Ejecución.**
-   - **Card sorting abierto:** dos codificadores clasifican de forma independiente la primera mitad de la muestra sin categorías predefinidas. Cada tarjeta puede iniciar un grupo nuevo o asignarse a uno existente, permitiendo fusionar, dividir o redefinir categorías durante el proceso. Las tarjetas sin sentido o fuera de alcance se asignan al grupo *Discard* [4].
-   - **Consolidación del esquema:** los codificadores concilian sus grupos mediante discusión abierta y construyen una taxonomía cerrada compartida, fusionando categorías conceptualmente similares en un único libro de códigos (*codebook*), siguiendo una estrategia similar a la utilizada por Liang et al. [2].
-   - **Card sorting cerrado:** ambos codificadores clasifican la segunda mitad de la muestra utilizando exclusivamente la taxonomía consolidada.
-3. **Análisis.** Se revisa la consistencia interna de los grupos obtenidos y, mediante diagramas de afinidad, se derivan categorías raíz a partir de las categorías de detalle, siguiendo estrategias similares a las reportadas por Begel y Zimmermann [3] y Wen et al. [1].
+#### 5.2.3 Protocolo de codificación
 
-#### 5.2.4 Acuerdo intercodificador
+El proceso aplicado fue híbrido:
 
-Cada tarjeta es clasificada por dos codificadores de forma independiente y las discrepancias se resuelven mediante un tercer codificador, replicando el procedimiento utilizado por Wen et al. [1].
+1. **Card sorting abierto.** Dos codificadores clasificaron PRs de manera independiente, proponiendo etiquetas sin un codebook cerrado.
+2. **Comparación intercodificador.** Se compararon ambas categorizaciones por `pr_id`, identificando acuerdos, desacuerdos conceptuales, diferencias de granularidad y casos de dato faltante.
+3. **Resolución de discusión.** Para cada desacuerdo se seleccionó una sola categoría final. La regla principal fue priorizar la causa sustantiva del rechazo por sobre el mecanismo de cierre cuando existía evidencia suficiente.
+4. **Codebook único.** Las categorías finales se consolidaron en un único libro de códigos con definición, ejemplos de evidencia, notas de codificación y criterio final de uso.
+5. **Taxonomía.** Las categorías del codebook se organizaron en familias raíz para producir un árbol de clasificación.
 
-Como criterio cuantitativo de acuerdo se exige **Cohen's κ ≥ 0,6**. Si κ < 0,6, se revisará el esquema de codificación antes de continuar.
+#### 5.2.4 Reglas de resolución de desacuerdos
 
-Este umbral corresponde a una decisión metodológica propia del estudio. Ninguna de las referencias utilizadas reporta Cohen's κ: Wen et al. informan únicamente porcentaje de desacuerdo [1], Liang et al. no reportan acuerdo intercodificador [2], y Begel y Zimmermann realizan clasificación conjunta hasta alcanzar consenso [3].
-
-#### 5.2.5 Categorías semilla
-
-Para el card sort cerrado se considera inicialmente el siguiente conjunto de categorías derivadas de la literatura y del dominio CI/CD:
-
-- Errores de sintaxis YAML.
-- Referencias a *actions*, imágenes o *runners* inexistentes.
-- Manejo incorrecto de *secrets* o *permissions*.
-- Problemas de matriz de versiones.
-- Cambios en *triggers* (`on:`).
-- Duplicación o eliminación de workflows.
-- Cambios fuera de alcance.
-- Configuraciones no portables.
-
-Estas categorías funcionan únicamente como punto de partida y podrán modificarse durante la fase abierta.
-
-#### 5.2.6 Estrategia de muestreo
-
-El archivo de trabajo exportado, `ci_cd_pr_filtered.csv`, contiene actualmente 269 PRs rechazados con exactamente un archivo CI/CD (salida del filtro F4), distribuidos por agente de la siguiente forma:
-
-| Agente | Cantidad |
+| Situación | Regla aplicada |
 |---|---|
-| Devin | 107 |
-| OpenAI Codex | 83 |
-| Copilot | 58 |
-| Cursor | 14 |
-| Claude Code | 7 |
+| Una categoría describe causa técnica y otra describe mecanismo de cierre | Priorizar la causa técnica si la evidencia es clara. |
+| Una categoría es general y otra es específica dentro de CI/CD | Priorizar la categoría CI/CD más específica. |
+| Un codificador marca dato faltante y el otro entrega evidencia verificable | Usar la categoría con evidencia disponible. |
+| Hay evidencia explícita de reemplazo, postergación o cierre voluntario | Conservar la categoría de proceso correspondiente. |
+| No hay evidencia suficiente en ninguna codificación | Usar C00 o C12, según corresponda. |
 
-Esta distribución impone dos restricciones respecto de los objetivos de muestreo:
+## 6. Resultados actuales
 
-- El total de 269 tarjetas queda por debajo del mínimo de 300 tarjetas definido para el estudio.
-- Cursor (14) y Claude Code (7) no alcanzan el mínimo de 30 PRs por agente.
-
-Por esta razón, el card sorting se realizará sobre la población F3 (PRs rechazados con uno o más archivos CI/CD; aproximadamente 454 casos según la cadena de filtros), utilizando F4 únicamente como subconjunto auxiliar de menor ruido.
-
-Las tarjetas se barajarán antes de la codificación para reducir efectos de orden [2].
-
-#### 5.2.7 Consideraciones metodológicas
-
-La distribución de categorías por agente se reportará de forma descriptiva.
-
-Se evita sobrecuantificar datos cualitativos: la ausencia de una categoría en un PR no implica necesariamente la ausencia del fenómeno, sino únicamente que dicho motivo no se manifestó explícitamente en ese caso [4].
-
-## 6. Estado de Avance
-
-### 6.1 Fase completada: Card Sorting Abierto 
-
-Se codificaron de forma independiente 50 PRs (Copilot:  distribuidos entre dos codificadores. Esta fase corresponde al card sort abierto descrito en §5.2.3: ambos codificadores asignaron etiquetas libremente sin categorías predefinidas.
+### 6.1 Resolución final de la categorización
 
 | Métrica | Valor |
-|---|---|
-| Tarjetas codificadas | 50 |
-| Codificadores | 2 (Camilo, Gonzalo) |
-| PRs en acuerdo | 30 (60,0 %) |
-| PRs en desacuerdo | 20 (40,0 %) |
-| Acuerdo observado (P₀) | 0,60 |
+|---|---:|
+| PRs resueltos | 269 |
+| Categorías del codebook | 19 |
+| Casos que ya estaban en acuerdo | 40 |
+| Casos de discusión resueltos | 229 |
+| Categorías tomadas desde Camilo | 249 |
+| Categorías tomadas desde Gonzalo | 20 |
+
+### 6.2 Distribución por familia taxonómica
+
+| Familia | n | % |
+|---|---:|---:|
+| F1. CI/CD y validación automática | 97 | 36.1% |
+| F2. Riesgo, gobernanza y operación | 76 | 28.3% |
+| F3. Revisión, integración y evolución | 62 | 23.0% |
+| F4. Adecuación técnica y alcance del cambio | 16 | 5.9% |
+| F5. Cierre sin causa verificable o experimental | 18 | 6.7% |
+
+La familia más frecuente es **Fallas de CI/CD**, lo que es esperable debido al criterio de selección del conjunto de datos: todos los PRs analizados modifican al menos un archivo de configuración CI/CD. Sin embargo, la taxonomía muestra que el cierre sin merge no se explica únicamente por fallos del pipeline; también aparecen razones de alcance, reemplazo, obsolescencia, falta de contexto y dinámica del proceso de revisión.
+
+### 6.3 Taxonomía de motivos de rechazo
+
+```mermaid
+graph TD
+    A[Motivos de rechazo en PRs CI/CD generados por agentes de IA]
+    A --> F1[CI/CD y validación automática<br/>97 casos]
+    F1 --> C04[C04 Falla de CI/CD<br/>92]
+    F1 --> C16[C16 Validación insuficiente<br/>5]
+    A --> F2[Riesgo, gobernanza y operación<br/>76 casos]
+    F2 --> C12[C12 Política/gobernanza<br/>39]
+    F2 --> C13[C13 Seguridad/permisos<br/>7]
+    F2 --> C14[C14 Toolchain/dependencias<br/>21]
+    F2 --> C15[C15 Release/deploy<br/>9]
+    A --> F3[Revisión, integración y evolución<br/>62 casos]
+    F3 --> C05[C05 Reemplazado o duplicado<br/>33]
+    F3 --> C06[C06 Abandono/iteración incompleta<br/>6]
+    F3 --> C07[C07 Conflicto/rebase/historial<br/>11]
+    F3 --> C08[C08 Cambio difícil de revisar<br/>9]
+    F3 --> C09[C09 Cambio obsoleto<br/>2]
+    F3 --> C19[C19 Pospuesto<br/>1]
+    A --> F4[Adecuación técnica y alcance del cambio<br/>16 casos]
+    F4 --> C10[C10 Diagnóstico/solución incorrecta<br/>5]
+    F4 --> C11[C11 Desacuerdo de diseño<br/>5]
+    F4 --> C17[C17 Fuera del foco CI/CD<br/>6]
+    A --> F5[Cierre sin causa verificable o experimental<br/>18 casos]
+    F5 --> C01[C01 Cierre sin evidencia<br/>10]
+    F5 --> C02[C02 Causa no determinable<br/>0]
+    F5 --> C03[C03 Fuente no disponible<br/>1]
+    F5 --> C18[C18 Experimento/WIP<br/>7]
+```
+
+## 6.4 Interpretación de la taxonomía
+
+La taxonomía separa dos planos. El primero corresponde a **causas sustantivas**, como fallas de CI/CD, riesgos de seguridad, cambios de toolchain, errores de diagnóstico o desacuerdos de diseño. El segundo corresponde a **dinámicas de cierre**, como abandono, reemplazo, cierre silencioso, PR experimental o fuente no disponible.
+
+Esta separación evita interpretar todo cierre sin merge como mala calidad técnica. Un PR puede cerrarse porque efectivamente rompe CI, pero también porque fue reemplazado por otro PR, porque no cumplía una regla administrativa, porque el cambio quedó obsoleto o porque la evidencia pública no permite conocer la causa.
+
+## 7. Implicancias
+
+### 7.1 Para desarrolladores y mantenedores
+
+Los resultados sugieren revisar tempranamente si el PR generado por IA realmente ejecuta el workflow propuesto, si respeta políticas del repositorio, si introduce riesgos de permisos/secrets, si el diff es revisable y si la solución corresponde al problema real.
 
 
-### 6.2 Codebook consolidado (v1.0)
+### 7.2 Para investigadores
 
-A partir del card sorting abierto, se construyó un codebook de 17 categorías mediante discusión directa entre codificadores, siguiendo la estrategia de Liang et al. [2].
+La taxonomía entrega una base empírica para estudiar fallas de agentes de IA en tareas CI/CD. También permite comparar agentes de forma descriptiva, siempre controlando por repositorio, tipo de tarea y evidencia disponible.
 
-#### Familia 1 — Fallas de CI/CD
+### 7.3 Para constructores de herramientas
 
-| Código | Nombre | Definición breve |
-|---|---|---|
-| **C01** | CI Failure General | El pipeline falló por errores introducidos o no anticipados por el PR (runner inválido, rebase incorrecto, fallo no resuelto sin causa clara). |
-| **C02** | CI Failure — Cobertura Insuficiente | El pipeline bloqueó el merge porque la cobertura de pruebas no alcanza el umbral mínimo configurado (coverage gate). |
-| **C03** | CI Failure — Fallos Masivos en Validaciones | El pipeline presenta fallos generalizados en múltiples pasos de validación (lint, tests, build, deploy) sin que una causa única sea dominante. |
-| **C04** | CI Failure — Nuevo Workflow sin Auto-validar | El PR introduce un nuevo workflow de CI/CD que falla en su propia ejecución inicial, sin correcciones antes del cierre. |
-| **C05** | CI Failure — Migración / Compatibilidad de Build | El pipeline se rompe durante una actualización de herramientas de build, versiones de dependencias o estrategia CI multi-módulo. |
-| **C06** | CI Failure — Governance Gate | El cierre se debe a que el PR no completó un proceso de gobernanza obligatorio: aprobación de revisores, PRLint, firmas de autoría, etc. |
-| **C07** | CI Failure — Optimización Incorrecta del Pipeline | El PR modifica la estrategia de ejecución de pruebas (paralelismo, matriz, runners) de forma incorrecta, causando fallo del pipeline. |
+Los resultados apuntan a mejoras concretas: validación previa de workflows, detección de cambios demasiado grandes, advertencias sobre permisos peligrosos, verificación de compatibilidad de dependencias, reconocimiento de políticas del repositorio y mejor alineación entre la propuesta del agente y el contexto del proyecto.
 
-#### Familia 2 — Rechazo en Revisión
 
-| Código | Nombre | Definición breve |
-|---|---|---|
-| **C08** | Rechazo por Diseño o Calidad del Código | El mantenedor rechaza el PR porque la solución no satisface criterios de calidad, diseño funcional o decisión arquitectónica. |
-| **C09** | Cambios Demasiado Grandes o Difíciles de Revisar | El PR es cerrado porque el diff generado es excesivamente grande, difícil de leer o está mal estructurado para revisión humana. |
-| **C10** | Desalineación entre Solución y Causa Raíz | La solución propuesta no aborda correctamente el problema real, o el agente careció de contexto clave para proponer la solución correcta. |
-| **C11** | Cambios Obsoletos por Evolución Arquitectónica | El PR fue cerrado porque la arquitectura del proyecto cambió mientras estaba abierto, dejando los cambios desactualizados o irrelevantes. |
+## 8. Referencias
 
-#### Familia 3 — Proceso y Cierre
+[1] F. Wen, C. Nagy, M. Lanza y G. Bavota, “An Empirical Study of Quick Remedy Commits”, en *Proc. 28th International Conference on Program Comprehension (ICPC '20)*, 2020, pp. 1–12. doi: 10.1145/3387904.3389266.
 
-| Código | Nombre | Definición breve |
-|---|---|---|
-| **C12** | Cierre Silencioso sin Explicación | El PR fue cerrado sin ningún comentario explicativo; no hay evidencia del motivo. |
-| **C13** | Cierre Voluntario / Deliberado | El autor o el mantenedor cierra deliberadamente el PR (experimento concluido, rama eliminada, decisión propia). |
-| **C14** | Pospuesto o Scope Reorientado | El PR fue cerrado con trabajo incompleto (WIP permanente) o el alcance fue reorientado para reimplementar más adelante. |
-| **C15** | Reemplazado por Otro Pull Request | El PR fue cerrado porque fue sustituido por otro PR (del mantenedor, del propio agente, o abierto en repositorio correcto). |
-| **C16** | Configuración Incorrecta de Entorno | El PR falla porque el entorno de CI/CD no tiene los componentes, variables o configuración necesarios para ejecutar el pipeline propuesto. |
+[2] J. T. Liang, C. Yang y B. A. Myers, “A Large-Scale Survey on the Usability of AI Programming Assistants: Successes and Challenges”, en *Proc. IEEE/ACM 46th International Conference on Software Engineering (ICSE '24)*, 2024. doi: 10.1145/3597503.3608128.
 
-#### Sin categoría
+[3] A. Begel y T. Zimmermann, “Analyze This! 145 Questions for Data Scientists in Software Engineering”, en *Proc. 36th International Conference on Software Engineering (ICSE '14)*, 2014, pp. 12–23. doi: 10.1145/2568225.2568233.
 
-| Código | Nombre | Definición breve |
-|---|---|---|
-| **C00** | No Clasificable / Datos Insuficientes | No hay suficiente información para asignar categoría (página no disponible, idioma no comprensible, sin artefactos accesibles). |
-
-### 6.3  Análisis de desacuerdos entre codificadores
-
-De los 20 PRs en desacuerdo, se identificaron cuatro tipos de discrepancia:
-
-| Tipo de desacuerdo | n | Descripción |
-|---|---|---|
-| **Desacuerdo Conceptual** | 9 | Los codificadores difieren en la interpretación semántica de la evidencia (ej. C12 vs C13: ¿silencio o voluntad explícita?). |
-| **Dato Faltante** | 5 | Uno de los codificadores no pudo acceder al artefacto (página 404, idioma no analizable), mientras el otro sí extrajo evidencia. |
-| **Desacuerdo Causa vs Mecanismo de Cierre** | 5 | Un codificador prioriza la causa técnica del fallo (ej. C02 cobertura) y el otro el mecanismo de cierre (ej. C14 scope reorientado). |
-| **Desacuerdo de Granularidad CI** | 1 | Diferencia entre una categoría CI general (C01) y una específica (C04 nuevo workflow). |
-
-Los pares de códigos más frecuentes en desacuerdo fueron:
-
-| Gonzalo → Camilo | n | Tipo |
-|---|---|---|
-| C12 → C13 | 4 | Conceptual (¿silencio o decisión voluntaria?) |
-| C00 → C12 / C04 / C14 | 4 | Dato faltante (Gonzalo sin acceso, Camilo con evidencia) |
-| C05/C06/C07 → C12/C02/C15 | 3 | Causa vs mecanismo de cierre |
-
-Estos desacuerdos orientan las prioridades de la sesión de consolidación antes del card sort cerrado (§6.5).
-
-## 7. Referencias
-
-Las siguientes referencias fundamentan la metodología cualitativa (*card sorting* y técnicas de codificación adyacentes) empleada en la PI3.
-
-[1] F. Wen, C. Nagy, M. Lanza y G. Bavota, «An Empirical Study of Quick Remedy Commits», en *Proc. 28th Int. Conf. on Program Comprehension (ICPC '20)*, Seúl, Corea del Sur, 2020, pp. 1–12. doi: 10.1145/3387904.3389266.
-
-[2] J. T. Liang, C. Yang y B. A. Myers, «A Large-Scale Survey on the Usability of AI Programming Assistants: Successes and Challenges», en *Proc. IEEE/ACM 46th Int. Conf. on Software Engineering (ICSE '24)*, Lisboa, Portugal, 2024. doi: 10.1145/3597503.3608128.
-
-[3] A. Begel y T. Zimmermann, «Analyze This! 145 Questions for Data Scientists in Software Engineering», en *Proc. 36th Int. Conf. on Software Engineering (ICSE '14)*, Hyderabad, India, 2014, pp. 12–23. doi: 10.1145/2568225.2568233.
-
-[4] T. Zimmermann, «Card-sorting: From Text to Themes», en *Perspectives on Data Science for Software Engineering*, Morgan Kaufmann, 2016, pp. 137–141.
+[4] T. Zimmermann, “Card-sorting: From Text to Themes”, en *Perspectives on Data Science for Software Engineering*, Morgan Kaufmann, 2016, pp. 137–141.
